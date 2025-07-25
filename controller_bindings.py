@@ -13,6 +13,8 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'true'
 os.environ['PYGAME_DETECT_AVX2'] = '0'
 
+username = os.getlogin()
+
 class ci:
 	DPAD_UP    = (0, 1)
 	DPAD_DOWN  = (0, -1)
@@ -35,6 +37,19 @@ class co:
 	X = ""
 	Y = ""
 
+class sound:
+	ROOT = f"/home/{username}/.steam/debian-installation/steamui/sounds"
+	NAVIGATION  = "deck_ui_misc_10.wav"
+	LAUNCHED    = "deck_ui_launch_game.wav"
+	JOY_CONNECT = "confirmation_positive.wav"
+	JOY_DCONNCT = "confirmation_negative.wav"
+
+if os.path.exists(sound.ROOT):
+	SOUND_ENABLED = True
+
+else:
+	SOUND_ENABLED = False
+
 def start_controller_support() -> multiprocessing.Process:
 	instance = multiprocessing.Process(target=_threaded_controller_manager, daemon=True, name="Gamepad bindings")
 	instance.start()
@@ -55,6 +70,12 @@ def _threaded_controller_manager():
 	except:
 		return
 	pygame.init()
+
+	if SOUND_ENABLED:
+		nav_sound = pygame.mixer.Sound(f"{sound.ROOT}/{sound.NAVIGATION}")
+		lau_sound = pygame.mixer.Sound(f"{sound.ROOT}/{sound.LAUNCHED}")
+		jcn_alert = pygame.mixer.Sound(f"{sound.ROOT}/{sound.JOY_CONNECT}")
+		jdn_alert = pygame.mixer.Sound(f"{sound.ROOT}/{sound.JOY_DCONNCT}")
 
 	num_detected_joys = pygame.joystick.get_count()
 
@@ -77,18 +98,31 @@ def _threaded_controller_manager():
 					match event.button:
 						case ci.A:
 							send_keystroke(co.A)
+							if SOUND_ENABLED:
+								lau_sound.play()
 
 				if event.type == pygame.JOYHATMOTION:
 					match event.value:
 						case ci.DPAD_UP:
 							send_keystroke(co.DPAD_UP)
+							if SOUND_ENABLED:
+								nav_sound.play()
 						case ci.DPAD_DOWN:
 							send_keystroke(co.DPAD_DOWN)
+							if SOUND_ENABLED:
+								nav_sound.play()
 
 				if event.type == pygame.JOYDEVICEADDED:
 					new_controller = pygame.joystick.Joystick(event.device_index)
 
+					if SOUND_ENABLED:
+						jcn_alert.play()
+
 					_threaded_greet_controller(new_controller)
+
+				if event.type  == pygame.JOYDEVICEREMOVED:
+					if SOUND_ENABLED:
+						jdn_alert.play()
 
 				if event.type == pygame.QUIT:
 					pygame.quit()
@@ -96,8 +130,8 @@ def _threaded_controller_manager():
 			# A, B, X, Y, DPAD
 			# controller_input = [gamepad.get_button(ci.A), gamepad.get_button(ci.B), gamepad.get_button(ci.X), gamepad.get_button(ci.Y), gamepad.get_hat(0)]
 
-		except Exception:
-			print("\a")
+		except Exception as err:
+			print(str(err))
 
 if __name__ == "__main__":
 	# Despite the name, this will be  run in the main thread instead of a subprocess

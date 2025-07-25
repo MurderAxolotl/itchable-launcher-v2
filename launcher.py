@@ -214,6 +214,11 @@ search_game_dir()
 
 if __name__ == "__main__":
 	while True:
+		if cs is not None:
+			if cs.is_alive:
+				cs.kill()
+			cs = None
+
 		cs = start_controller_support()
 		clear()
 
@@ -488,3 +493,8 @@ if __name__ == "__main__":
 						else:
 							print(RED + "Failed to find valid executable! Aborting..." + RESET)
 							time.sleep(5)
+
+			if cs is not None:
+				if cs.is_alive:
+					cs.kill()
+				cs = None
