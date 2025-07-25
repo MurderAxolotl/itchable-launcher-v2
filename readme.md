@@ -4,5 +4,7 @@ Requires the following Python modules:
 - questionary
 - dotenv
 - pyimgur
+- Pillow
+- requests
 
 This project is mostly for Linux systems, but has partial Windows support. Some features may be broken, though!

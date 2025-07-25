@@ -50,7 +50,10 @@ def _threaded_greet_controller(controller):
 	controller.stop_rumble()
 
 def _threaded_controller_manager():
-	import pygame
+	try:
+		import pygame
+	except:
+		return
 	pygame.init()
 
 	num_detected_joys = pygame.joystick.get_count()
