@@ -28,11 +28,9 @@ from controller_bindings import start_controller_support
 BUILD_VERSION = 4
 USERNAME = os.getlogin()
 
-# Set the game directory here
-game_dir = f"/home/{USERNAME}/Games/"
-
-# Load environment variables, mostly for remote launch support
+# Load environment variables
 dotenv.load_dotenv(".env")
+game_dir = os.getenv("game_dir")
 
 def _imgur():
 	return pyimgur.Imgur(os.getenv("imgur_key"), os.getenv("imgur_secret"), refresh_token=os.getenv("irt"))
@@ -171,7 +169,7 @@ def launch_executable(launch_path, game_name:str="", game_cover:str="itch_icon")
 		cs = None
 
 
-	if ".sh" in launch_path or ".x86_64" in launch_path and os.name == "posix":
+	if ".sh" in launch_path or ".x86_64" in launch_path:
 		# Linux native, launch directly
 
 		if not os.access(launch_path, os.X_OK):
