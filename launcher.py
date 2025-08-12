@@ -63,7 +63,7 @@ CONSTANTS. DO NOT TOUCH
 """
 PATH = sys.path[0]
 
-if os.name == "posix":
+if os.name.lower() == "posix":
 	VALID_EXECUTABLES = ["sh", "x86_64", "exe"] # Executable formats, in order of priority
 else:
 	# Half-baked Windows support
@@ -86,7 +86,7 @@ cs = None
 show_unsupported_only = False
 
 def clear():
-	if os.name != "NT": os.system("clear")
+	if os.name.lower() != "nt": os.system("clear")
 	else: os.system("cls")
 
 def search_game_dir(reset_list:bool=False):
@@ -193,7 +193,7 @@ def launch_executable(launch_path, game_name:str="", game_cover:str="itch_icon")
 	elif ".exe" in launch_path:
 		# Windows executable, determine if Wine is needed
 
-		if os.name != "NT":
+		if os.name.lower() != "nt":
 			print(YELLOW + "Warning: launching using Wine's default prefix! Output will be messy" + DRIVES)
 			os.system(f"wine {launch_path}")
 			print(RESET)
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 		cs = start_controller_support()
 		clear()
 
-		if os.name != "posix":
+		if os.name.lower() != "posix":
 			print(YELLOW + "Controllers are NOT supported on this platform!" + RESET)
 
 		if os.path.exists("/tmp/_itchable_game_image"):
