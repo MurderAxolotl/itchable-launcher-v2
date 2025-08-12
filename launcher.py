@@ -1,7 +1,5 @@
 """
 Itchable game launcher
-
-Set game_dir below, after imports
 """
 
 import questionary
@@ -13,14 +11,17 @@ import gzip
 import shutil
 import json
 import requests
-import pyimgur
+try:
+	import pyimgur
+except:
+	print("PyImgur is not installed")
 
 from po2 import nearest_power_of_2
 
 from io import BytesIO
 from PIL import Image
 
-from colour import *
+from colour import BLUE, DRIVES, RED, MAGENTA, YELLOW, RESET
 
 from remote_manager import mount_game_folder, unmount_game_folder
 from controller_bindings import start_controller_support
@@ -30,7 +31,7 @@ USERNAME = os.getlogin()
 
 # Load environment variables
 dotenv.load_dotenv(".env")
-game_dir = os.getenv("game_dir")
+game_dir = os.getenv("game_dir", "")
 
 def _imgur():
 	return pyimgur.Imgur(os.getenv("imgur_key"), os.getenv("imgur_secret"), refresh_token=os.getenv("irt"))
@@ -61,7 +62,12 @@ QUESTIONARY_STYLES = questionary.Style(
 CONSTANTS. DO NOT TOUCH
 """
 PATH = sys.path[0]
-VALID_EXECUTABLES = ["sh", "x86_64", "exe"] # Executable formats, in order of priority
+
+if os.name == "posix":
+	VALID_EXECUTABLES = ["sh", "x86_64", "exe"] # Executable formats, in order of priority
+else:
+	# Half-baked Windows support
+	VALID_EXECUTABLES = ["exe"]
 
 """
 USER-CONFIGURABLE CONSTANTS
@@ -165,9 +171,9 @@ def launch_executable(launch_path, game_name:str="", game_cover:str="itch_icon")
 	global cs
 	if cs is not None:
 		if cs.is_alive:
+			print("\a")
 			cs.kill()
 		cs = None
-
 
 	if ".sh" in launch_path or ".x86_64" in launch_path:
 		# Linux native, launch directly
@@ -247,7 +253,8 @@ if __name__ == "__main__":
 		# Unsupported games aren't shown by default, but give a menu option if unsupported games are detected
 
 		if len(unsupported) != 0:
-			if not show_unsupported_only: menu_choices.append(questionary.Choice(title=[("class:unsupported", "(System) Unsupported Games")]))
+			if not show_unsupported_only:
+				menu_choices.append(questionary.Choice(title=[("class:unsupported", "(System) Unsupported Games")]))
 
 		if show_unsupported_only:
 			if len(unsupported) != 0:
@@ -347,7 +354,7 @@ if __name__ == "__main__":
 								game_cover = "itch_icon"
 								game_image = "itch_icon"
 
-							# Crop the fuckin image
+							# Crop the image
 							try:
 								if not UPLOADED:
 									print(YELLOW + "Configuring game image..." + RESET)
