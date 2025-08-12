@@ -104,8 +104,6 @@ def search_game_dir(reset_list:bool=False):
 	for entry in os.listdir(game_dir):
 		if os.path.isdir(game_dir + entry): detected_directories.append(entry)
 
-	if len(detected_directories) == 0: print(RED + "No games detected!" + RESET)
-
 	# Parse the directories and determine type
 
 	for game_folder in detected_directories:
@@ -229,7 +227,7 @@ if __name__ == "__main__":
 		clear()
 
 		if os.name != "posix":
-			print(YELLOW + "Controllers are NOT supported on this platform!)" + RESET)
+			print(YELLOW + "Controllers are NOT supported on this platform!" + RESET)
 
 		if os.path.exists("/tmp/_itchable_game_image"):
 			os.remove("/tmp/_itchable_game_image")
@@ -268,13 +266,19 @@ if __name__ == "__main__":
 			clear()
 
 		else:
-			if rpc_available: menu_choices.append(questionary.Choice(title=[("class:system", "(Itchable) Disable RPC for session")]))
+			if len(menu_choices) == 0:
+				menu_choices.append(questionary.Choice(title=[("class:unsupported", "-")], disabled="No games detected"))
+			if rpc_available:
+				menu_choices.append(questionary.Choice(title=[("class:system", "(Itchable) Disable RPC for session")]))
 			menu_choices.append(questionary.Choice(title=[("class:system", "(Itchable) Override game directory")]))
-			if os.path.exists("/bin/ajax12"): menu_choices.append(questionary.Choice(title=[("class:system", "(System) Mod Injector")]))
+
+			if os.path.exists("/bin/ajax12"):
+				menu_choices.append(questionary.Choice(title=[("class:system", "(System) Mod Injector")]))
 			menu_choices.append(questionary.Choice(title=[("class:system", "(System) Scan for changes")]))
 			menu_choices.append(questionary.Choice(title=[("class:system", "(System) Exit")]))
 
-			if not rpc_available: print(YELLOW + "Discord RPC is unavailable or disabled" + RESET)
+			if not rpc_available:
+				print(YELLOW + "Discord RPC is unavailable or disabled" + RESET)
 
 			prompt = questionary.select("Select a game", menu_choices, style=QUESTIONARY_STYLES).ask()
 
