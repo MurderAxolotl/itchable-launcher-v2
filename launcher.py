@@ -16,15 +16,16 @@ try:
 except:
 	print("PyImgur is not installed")
 
-from po2 import nearest_power_of_2
-
 from io import BytesIO
 from PIL import Image
 
-from colour import BLUE, DRIVES, RED, MAGENTA, YELLOW, RESET
+from modules.po2 import nearest_power_of_2
 
-from remote_manager import mount_game_folder, unmount_game_folder
-from controller_bindings import start_controller_support
+from modules.colour import BLUE, DRIVES, RED, MAGENTA, YELLOW, RESET
+
+from modules.remote_manager      import mount_game_folder, unmount_game_folder
+from modules.itchInterface       import update
+from modules.controller_bindings import start_controller_support
 
 BUILD_VERSION = 4
 USERNAME = os.getlogin()
@@ -32,6 +33,7 @@ USERNAME = os.getlogin()
 # Load environment variables
 dotenv.load_dotenv(".env")
 game_dir = os.getenv("game_dir", "")
+always_check_for_updates = bool(os.getenv("autocheck_updates", False))
 
 def _imgur():
 	return pyimgur.Imgur(os.getenv("imgur_key"), os.getenv("imgur_secret"), refresh_token=os.getenv("irt"))
@@ -133,7 +135,8 @@ def itch_check_versions(game_name:str, game_path:str):
 		unsupported.append(game_name)
 
 	for version in os.listdir(game_path):
-		if version != ".itch" and version != "remote_launch.json": versions.append(version)
+		if version != ".itch" and version != "remote_launch.json" and os.path.isdir(f"{game_dir}/{version}") and (not ".zip" in version):
+			versions.append(version)
 
 	itch_games.update({game_name:versions})
 
@@ -322,6 +325,32 @@ if __name__ == "__main__":
 
 					# Determine launch type
 					if prompt in itch_games:
+						stayInLaunchMenu = True
+
+						if not always_check_for_updates:
+							while stayInLaunchMenu:
+								acts = [
+									questionary.Choice(title=[("class:itch","Launch")]),
+									questionary.Choice(title=[("class:non_itch","Check for updates")])
+								]
+								state = questionary.select("Actions for game", acts, style=QUESTIONARY_STYLES).ask()
+
+								if state == "Launch":
+									stayInLaunchMenu = False
+
+								elif state is not None:
+									update(game_dir + prompt)
+
+								else:
+									break
+
+							# You have escaped. You should not be able to escape.
+							if stayInLaunchMenu:
+								continue # Kick 'em out
+
+						else:
+							update(game_dir + prompt)
+
 						print(f"{YELLOW}Launching {MAGENTA}{prompt}{YELLOW}...{RESET}" )
 
 						launch_path = game_dir + prompt
@@ -404,6 +433,10 @@ if __name__ == "__main__":
 									detected_versions.remove("remote_launch.json")
 								except Exception:
 									NotImplemented # pyright:ignore
+
+								for entry in detected_versions:
+									if not os.path.isdir(f"{launch_path}/{entry}"):
+										detected_versions.remove(entry)
 
 								try:
 									detected_versions.remove("global")

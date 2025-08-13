@@ -7,4 +7,4 @@ Requires the following Python modules:
 - Pillow
 - requests
 
-This project is for Linux systems. Good luck getting it to work on Windows :)
+Primarily developed for Linux, but Windows should technically be supported

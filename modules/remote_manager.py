@@ -5,7 +5,7 @@ import sys
 import time
 
 
-from colour import RED, YELLOW, BLUE, RESET
+from modules.colour import RED, YELLOW, BLUE, RESET
 
 PATH = sys.path[0]
 

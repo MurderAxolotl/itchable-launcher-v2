@@ -1,0 +1,43 @@
+{
+	"uploads": [
+		{
+			"storage": "hosted",
+			"game_id": 2472758,
+			"updated_at": "2025-05-30T00:21:20.000000000Z",
+			"traits": ["p_windows", "p_linux"],
+			"type": "default",
+			"position": 17,
+			"size": 592733217,
+			"md5_hash": "d74a9d9e40f264c00a4471f41430bbea",
+			"filename": "PTK v0.7 (PC).zip",
+			"created_at": "2025-05-30T00:13:44.000000000Z",
+			"id": 13849457
+		},
+		{
+			"storage": "hosted",
+			"game_id": 2472758,
+			"updated_at": "2025-05-30T00:21:20.000000000Z",
+			"traits": ["p_osx"],
+			"type": "default",
+			"position": 18,
+			"size": 587419567,
+			"md5_hash": "06e3286835113e892cafdf37b8d7ec50",
+			"filename": "PTK v0.7 (Mac).zip",
+			"created_at": "2025-05-30T00:13:44.000000000Z",
+			"id": 13849456
+		},
+		{
+			"storage": "hosted",
+			"game_id": 2472758,
+			"updated_at": "2025-05-30T00:21:20.000000000Z",
+			"traits": ["p_android"],
+			"type": "default",
+			"position": 19,
+			"size": 619147366,
+			"md5_hash": "a37f2f6be14752212dfc5e95e6632abe",
+			"filename": "PTK v0.7 (Android).apk",
+			"created_at": "2025-05-30T00:13:44.000000000Z",
+			"id": 13849458
+		}
+	]
+}
