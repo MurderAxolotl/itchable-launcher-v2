@@ -259,9 +259,7 @@ if __name__ == "__main__":
 		menu_choices = []
 
 		if os.name != "posix":
-			if cs is not None:
-				if cs.is_alive:
-					cs.kill()
+			csT = False
 
 		if cs is not None:
 			if cs.is_alive:
