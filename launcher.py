@@ -258,9 +258,6 @@ if __name__ == "__main__":
 		# Scanning the disk for files is more expensive, so we avoid it unless requested (on launch or by user)
 		menu_choices = []
 
-		if os.name != "posix":
-			csT = False
-
 		if cs is not None:
 			if cs.is_alive:
 				csT = True
@@ -268,6 +265,9 @@ if __name__ == "__main__":
 				csT = False
 
 		else:
+			csT = False
+
+		if os.name != "posix":
 			csT = False
 
 		if not show_unsupported_only:
