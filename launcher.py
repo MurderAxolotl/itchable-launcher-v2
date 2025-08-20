@@ -188,8 +188,11 @@ def launch_executable(launch_path, game_name:str="", game_cover:str="itch_icon")
 	global cs
 	if cs is not None:
 		if cs.is_alive:
-			print("\a")
-			cs.kill()
+			try:
+				print("\a")
+				cs.kill()
+			except AttributeError:
+				pass
 		cs = None
 
 	if ".sh" in launch_path or ".x86_64" in launch_path:
@@ -241,7 +244,10 @@ if __name__ == "__main__":
 	while True:
 		if cs is not None:
 			if cs.is_alive:
-				cs.kill()
+				try:
+					cs.kill()
+				except AttributeError:
+					pass
 			cs = None
 
 		cs = start_controller_support()
@@ -380,7 +386,10 @@ if __name__ == "__main__":
 				case "(System) Exit":
 					if cs is not None:
 						if cs.is_alive:
-							cs.kill()
+							try:
+								cs.kill()
+							except Exception:
+								pass
 
 					sys.exit(0)
 
@@ -612,5 +621,8 @@ if __name__ == "__main__":
 
 			if cs is not None:
 				if cs.is_alive:
-					cs.kill()
+					try:
+						cs.kill()
+					except AttributeError:
+						pass
 				cs = None
