@@ -65,6 +65,9 @@ def _threaded_greet_controller(controller):
 	controller.stop_rumble()
 
 def _threaded_controller_manager():
+	if os.name.lower() != "posix":
+		return
+
 	try:
 		import pygame
 	except:

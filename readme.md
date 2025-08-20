@@ -11,11 +11,11 @@ Primarily developed for Linux, but Windows should technically be supported
 
 ## Environment Variables
 
-game_dir = "/path/to/games" - The path Itchable will scan for games\
-itch_auth = "auth_key" - Itch auth key, for updating games. See the section below\
-autocheck_updates = True - Whether to automatically check for game updates
-raw_cake = False - Whether to enable unfinished / half-baked features
-use_discord_rpc = False - Whether to enable Discord RPC
+`game_dir = "/path/to/games"` - The path Itchable will scan for games\
+`itch_auth = "auth_key"`      - Itch auth key, for updating games. See the section below\
+`autocheck_updates = True`    - Whether to automatically check for game updates
+`raw_cake = False`            - Whether to enable unfinished / half-baked features
+`use_discord_rpc = False`     - Whether to enable Discord RPC
 
 ## Updating Games
 

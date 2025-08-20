@@ -247,9 +247,6 @@ if __name__ == "__main__":
 		cs = start_controller_support()
 		clear()
 
-		if os.name.lower() != "posix":
-			print(YELLOW + "Controllers are NOT supported on this platform!" + RESET)
-
 		if os.path.exists("/tmp/_itchable_game_image"):
 			os.remove("/tmp/_itchable_game_image")
 
