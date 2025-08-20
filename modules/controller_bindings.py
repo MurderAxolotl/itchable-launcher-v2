@@ -52,6 +52,8 @@ else:
 
 def start_controller_support() -> multiprocessing.Process:
 	instance = multiprocessing.Process(target=_threaded_controller_manager, daemon=True, name="Gamepad bindings")
+	if os.name.lower() != "posix":
+		return instance
 	instance.start()
 
 	return instance
