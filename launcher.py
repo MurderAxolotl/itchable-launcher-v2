@@ -269,7 +269,7 @@ if __name__ == "__main__":
 
 		if not show_unsupported_only:
 			# Status information
-			s_rpc = "[green]Discord RPC[/]"  if rpc_available else "[red]Discsord RPC[/]"
+			s_rpc = "[green]Discord RPC[/]"  if rpc_available else "[red]Discord RPC[/]"
 			s_cnt = "[green]Controllers[/]"  if csT else "[red]Controllers[/]"
 
 			if itch_auth != "":
