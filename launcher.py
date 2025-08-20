@@ -258,6 +258,11 @@ if __name__ == "__main__":
 		# Scanning the disk for files is more expensive, so we avoid it unless requested (on launch or by user)
 		menu_choices = []
 
+		if os.name != "posix":
+			if cs is not None:
+				if cs.is_alive:
+					cs.kill()
+
 		if cs is not None:
 			if cs.is_alive:
 				csT = True
