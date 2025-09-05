@@ -32,10 +32,11 @@ USERNAME = os.getlogin()
 dotenv.load_dotenv(".env", override=True)
 game_dir = os.getenv("game_dir", "")
 itch_auth = os.getenv("itch_auth", "")
-always_check_for_updates = os.getenv("autocheck_updates", "False") == "True"
-disc_rpc =                 os.getenv("use_discord_rpc",   "False") == "True"
-raw_cake =                 os.getenv("raw_cake",          "False") == "True"
-devtools =                 os.getenv("devtools",          "False") == "True"
+always_check_for_updates = os.getenv("autocheck_updates",    "False") == "True"
+autolaunch_after_update  = os.getenv("launch_after_updates", "False") == "True"
+disc_rpc =                 os.getenv("use_discord_rpc",      "False") == "True"
+raw_cake =                 os.getenv("raw_cake",             "False") == "True"
+devtools =                 os.getenv("devtools",             "False") == "True"
 
 def _imgur():
 	return pyimgur.Imgur(os.getenv("imgur_key"), os.getenv("imgur_secret"), refresh_token=os.getenv("irt"))
@@ -180,7 +181,6 @@ def find_executable(launch_path):
 
 def launch_executable(launch_path, game_name:str="", game_cover:str="itch_icon"):
 	""" Determine executable type and determine best launch method """
-	print(f"{MAGENTA}Launching {game_name}")
 
 	if rpc_available:
 		rpc_connection.set_activity(f"Playing {game_name}", large_image=game_cover)
@@ -395,6 +395,7 @@ if __name__ == "__main__":
 
 				case _:
 					clear()
+					faud = False
 
 					# Determine launch type
 					if prompt in itch_games:
@@ -420,6 +421,7 @@ if __name__ == "__main__":
 
 								if state == "Launch":
 									stayInLaunchMenu = False
+									faud = True
 
 								elif state == "Detach from Itch app":
 									np = ibl_detach(game_dir + prompt, prompt)
@@ -445,14 +447,32 @@ if __name__ == "__main__":
 								continue # Kick 'em out
 
 						else:
-							update(game_dir + prompt)
+							update_state = update(game_dir + prompt)
 
-						print(f"{YELLOW}Launching {MAGENTA}{prompt}{YELLOW}...{RESET}" )
+							if update_state == 6:
+								faud = True
+
+						if (autolaunch_after_update == False) and not faud:
+							acts = [
+								questionary.Choice(title=[("class:itch","Launch")]),
+								questionary.Choice(title=[("class:unsupported","Return")])
+							]
+
+							post_update_action = questionary.select("Update complete", acts).ask()
+
+							if post_update_action == "Launch":
+								allow_launch = True
+
+							else:
+								allow_launch = False
+
+						else:
+							allow_launch = True
 
 						launch_path = game_dir + prompt
 						game_title = None
 
-						if os.path.exists(launch_path):
+						if os.path.exists(launch_path) and allow_launch:
 							if os.path.exists(f"{launch_path}/.ibl"):
 								ich = "ibl"
 							else:
@@ -476,11 +496,11 @@ if __name__ == "__main__":
 									with open(f"{launch_path}/.{ich}/icon_url", "r") as cached_image:
 										game_image = cached_image.read()
 
-									print(YELLOW + "Using already uploaded image" + RESET)
-
 								else:
 									UPLOADED = False
-									game_image = upload_cover_to_itch(game_cover, launch_path, ich, _imgur)
+
+									with console.status("[yellow]Uploading cover to Imgur[/]"):
+										game_image = upload_cover_to_itch(game_cover, launch_path, ich, _imgur)
 
 							except Exception:
 								UPLOADED = True
@@ -491,12 +511,10 @@ if __name__ == "__main__":
 							# Crop the image
 							try:
 								if not UPLOADED:
-									print(YELLOW + "Configuring game image..." + RESET)
+									with console.status("[yellow]Uploading cover to Imgur[/]"):
+										upload_cover_to_itch(game_cover, launch_path, ich, _imgur)
 
-									upload_cover_to_itch(game_cover, launch_path, ich, _imgur)
-
-							except Exception as err:
-								print(RED + "Failed to upload to Imgur! " + str(err) + RESET)
+							except Exception:
 								game_image = "itch_icon"
 
 							detected_versions:list = os.listdir(launch_path)
@@ -544,13 +562,12 @@ if __name__ == "__main__":
 								if not launch_file == -1:
 									launch_path = launch_path + launch_file
 
-									print(f"{YELLOW}Found executable! Launching using {MAGENTA}{launch_path}{RESET}")
-
 									# game_name = game_mounted[1] if is_remote else version
 									if game_title is None:
 										game_title = version
 									game_name = game_title
 
+									console.print(f"[yellow]Running executable[/] [magenta]{launch_path}[/]")
 									launch_executable(launch_path, game_name, game_image)
 
 								else:
@@ -574,23 +591,18 @@ if __name__ == "__main__":
 										launch_path = launch_path + f"/{dir}/"
 										version = dir
 
-										print(f"{YELLOW}Found game version: {MAGENTA}{dir}{YELLOW}, attempting launch...")
-										print(f"{YELLOW}Current path is {MAGENTA}{launch_path}{RESET}")
-
 								if not found_launchable:
 									print(f"{RED}Couldn't find a version of {MAGENTA}{prompt}{RED} to launch!")
 									time.sleep(5)
 
 								else:
 									# Find the executable #
-
 									launch_file = find_executable(launch_path)
 
 									if not launch_file == -1:
 										launch_path = launch_path + launch_file
 
-										print(f"{YELLOW}Found executable! Launching using {MAGENTA}{launch_path}{RESET}")
-
+										console.print(f"[yellow]Running executable[/] [magenta]{launch_path}[/]")
 										launch_executable(launch_path, game_title, game_image)
 
 									else:
@@ -598,21 +610,18 @@ if __name__ == "__main__":
 										time.sleep(5)
 
 						else:
-							print(RED + "WARNING: Directory has moved or been deleted!" + RESET)
-							time.sleep(5)
-							search_game_dir(True) # Force a rescan, since and invalid entry has been generated
+							if allow_launch:
+								print(RED + "WARNING: Directory has moved or been deleted!" + RESET)
+								search_game_dir(True) # Force a rescan, since and invalid entry has been generated
 
 					elif prompt in cust_games:
-						print(f"{YELLOW}Launching {MAGENTA}{prompt}{YELLOW}...{RESET}")
-
 						launch_path = game_dir + prompt + "/"
 						launch_file = find_executable(launch_path)
 
 						if not launch_file == -1:
 							launch_path = launch_path + launch_file
 
-							print(f"{YELLOW}Found executable! Launching using {MAGENTA}{launch_path}{RESET}")
-
+							console.print(f"[yellow]Running executable[/] [magenta]{launch_path}[/]")
 							launch_executable(launch_path, launch_file)
 
 						else:

@@ -398,6 +398,7 @@ def update(game_dir:str, silent_install:bool=False, check_only:bool=False, force
 
 			else:
 				console.print("[yellow]Game is already up to date[/]")
+				return 6
 
 		elif check_only:
 			if file_name in blacklisted_updates:
