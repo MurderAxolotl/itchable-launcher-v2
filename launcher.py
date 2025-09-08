@@ -148,7 +148,7 @@ def itch_check_versions(game_name:str, game_path:str):
 		unsupported.append(game_name)
 
 	for version in os.listdir(game_path):
-		if version != ".ibl" and version != ".itch" and version != "remote_launch.json" and os.path.isdir(f"{game_dir}/{version}") and (not ".zip" in version):
+		if version != ".ibl" and version != ".itch" and version != "remote_launch.json" and os.path.isdir(f"{game_dir}/{version}") and (".zip" not in version):
 			versions.append(version)
 
 	itch_games.update({game_name:versions})
@@ -158,12 +158,14 @@ def find_executable(launch_path):
 
 	try:
 		for extension in VALID_EXECUTABLES:
-			if launch_file != None: continue
+			if launch_file is not None:
+				continue
 
 			for file in os.listdir(launch_path):
 					try:
 						if not os.path.isfile(launch_path + file): continue;
-						if launch_file != None: continue
+						if launch_file is not None:
+							continue
 
 						if str(str(file).split(".")[len(str(file).split("."))-1]) == str(extension):
 							launch_file = file
@@ -452,7 +454,7 @@ if __name__ == "__main__":
 							if update_state == 6:
 								faud = True
 
-						if (autolaunch_after_update == False) and not faud:
+						if (not autolaunch_after_update) and not faud:
 							acts = [
 								questionary.Choice(title=[("class:itch","Launch")]),
 								questionary.Choice(title=[("class:unsupported","Return")])
@@ -538,7 +540,7 @@ if __name__ == "__main__":
 							except Exception:
 								pass # pyright:ignore
 
-							if len(detected_versions) > 2:
+							if len(detected_versions) > 1:
 								# Show a prompt screen
 								clear()
 
